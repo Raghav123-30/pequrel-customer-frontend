@@ -1,11 +1,11 @@
 <script>
 	import '../app.css';
-	import { locale, locales } from 'svelte-i18n';
+	//import { locale, locales } from 'svelte-i18n';
 </script>
 
-<select bind:value={$locale}>
+<!-- <select bind:value={$locale}>
 	{#each $locales as loc}
 		<option value={loc}>{loc}</option>
 	{/each}
-</select>
+</select> -->
 <slot></slot>
