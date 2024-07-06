@@ -1,4 +1,5 @@
-<script lang="ts">
+<script>
+	import '../app.css';
 	import { locale, locales } from 'svelte-i18n';
 </script>
 
@@ -7,4 +8,4 @@
 		<option value={loc}>{loc}</option>
 	{/each}
 </select>
-<slot />
+<slot></slot>
