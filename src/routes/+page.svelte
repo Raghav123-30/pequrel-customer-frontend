@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	let isLanguageSelected = false;
-	let showRegisterForm = false;
+
 	import { Button, Card, Label, Select, Input } from 'flowbite-svelte';
 	import { locale } from 'svelte-i18n';
 	const languages = [
@@ -26,87 +28,30 @@
 	<img
 		src="/background.png"
 		alt="background"
-		class="w-full h-full object-cover filter brightness-75"
+		class="h-full w-full object-cover brightness-75 filter"
 	/>
 </div>
 
-<div class="flex flex-col h-screen justify-center items-center px-4">
-	<Card class="max-w-2xl md:max-w-[700px] space-y-6 p-6">
-		<div class="flex justify-center mb-8">
-			<img src="/logo.png" class="me-3 h-6 sm:h-9" alt="Pequrel Logo" />
+<div class="flex h-screen flex-col items-center justify-center px-4">
+	<Card class="max-w-2xl space-y-6 p-6 md:max-w-[700px]">
+		<div class="space-y-4">
+			<Label for="language-select">Select your preferred language</Label>
+			<Select
+				id="language-select"
+				items={languages}
+				bind:value={selectedLanguage}
+				placeholder="Choose a language"
+			></Select>
+			<Button
+				disabled={!selectedLanguage}
+				on:click={() => {
+					$locale = selectedLanguage;
+					isLanguageSelected = true;
+					goto('/user/login');
+				}}
+			>
+				Continue
+			</Button>
 		</div>
-		{#if isLanguageSelected}
-			{#if showRegisterForm}
-				<h5 class="mb-4 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
-					Create an Account
-				</h5>
-				<form class="flex flex-col gap-6">
-					<div class="flex flex-col gap-4">
-						<Label for="register-email">Email Address</Label>
-						<Input id="register-email" type="email" placeholder="youremail@example.com" required />
-					</div>
-					<div class="flex flex-col gap-4">
-						<Label for="register-password">Password</Label>
-						<Input id="register-password" type="password" placeholder="**************" required />
-					</div>
-					<div class="flex justify-between gap-2">
-						<Button class="w-fit">Register</Button>
-						<button
-							type="button"
-							class="text-gray-500 text-sm hover:underline"
-							on:click={() => (showRegisterForm = false)}
-						>
-							Already have an account? Log in
-						</button>
-					</div>
-				</form>
-			{:else}
-				<h5 class="mb-4 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
-					Welcome Back
-				</h5>
-				<form class="flex flex-col gap-6">
-					<div class="flex flex-col gap-4">
-						<Label for="login-email">Email Address</Label>
-						<Input id="login-email" type="email" placeholder="youremail@example.com" required />
-					</div>
-					<div class="flex flex-col gap-4">
-						<Label for="login-password">Password</Label>
-						<Input id="login-password" type="password" placeholder="**************" required />
-						<button type="button" class="text-gray-500 text-sm hover:underline w-fit"
-							>Forgot password?</button
-						>
-					</div>
-					<div class="flex justify-between gap-2">
-						<Button class="w-fit">Login</Button>
-						<button
-							type="button"
-							class="text-gray-500 text-sm hover:underline"
-							on:click={() => (showRegisterForm = true)}
-						>
-							New here? Create an account
-						</button>
-					</div>
-				</form>
-			{/if}
-		{:else}
-			<div class="space-y-4">
-				<Label for="language-select">Select your preferred language</Label>
-				<Select
-					id="language-select"
-					items={languages}
-					bind:value={selectedLanguage}
-					placeholder="Choose a language"
-				></Select>
-				<Button
-					disabled={!selectedLanguage}
-					on:click={() => {
-						$locale = selectedLanguage;
-						isLanguageSelected = true;
-					}}
-				>
-					Continue
-				</Button>
-			</div>
-		{/if}
 	</Card>
 </div>
