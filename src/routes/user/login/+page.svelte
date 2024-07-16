@@ -8,7 +8,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	export let data;
-	const { form, errors, enhance, submitting } = superForm(data.form, {
+	const { form, errors, enhance, submitting, message } = superForm(data.form, {
 		validators: zod(loginSchema),
 		onSubmit: () => {
 			console.log('Submitting');
@@ -17,6 +17,9 @@
 			console.log(result);
 			console.log('We got result');
 		}
+	});
+	message.subscribe((value) => {
+		console.log('Message from server is ' + value);
 	});
 </script>
 
@@ -28,7 +31,7 @@
 		<h5 class="mb-4 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
 			Welcome Back
 		</h5>
-		<form class="flex flex-col gap-6" method="POST">
+		<form class="flex flex-col gap-6" method="POST" use:enhance>
 			<div class="flex flex-col gap-4">
 				<Label for="login-email">Email Address</Label>
 				<Input
@@ -53,6 +56,7 @@
 					bind:value={$form.password}
 				>
 					<button
+						type="button"
 						slot="left"
 						on:click={() => (showPassword = !showPassword)}
 						class="pointer-events-auto"

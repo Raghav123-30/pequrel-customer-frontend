@@ -3,14 +3,15 @@
 	import { Button, Card, Label, Select, Input, Helper } from 'flowbite-svelte';
 	import { locale } from 'svelte-i18n';
 	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
-	import { superForm } from 'sveltekit-superforms';
+	import SuperDebug, { superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { registerSchema } from '$lib/schema/registerSchema.js';
+	import { otpSchema } from '$lib/schema/otpSchema.js';
 
 	let showPassword = false;
 	let showConfirmPassword = false;
 	export let data;
-	const { form, errors, enhance, submitting } = superForm(data.form, {
+	const { form, errors, enhance, submitting, message } = superForm(data.form, {
 		validators: zod(registerSchema),
 		onSubmit: () => {
 			console.log('Submitting');
@@ -19,8 +20,27 @@
 			console.log('We got result');
 		}
 	});
+	const {
+		form: verifyForm,
+		errors: verifyFormErrors,
+		enhance: verifyFormEnhance,
+		submitting: verifyFormSubmitting,
+		message: verifyFormMessage
+	} = superForm(data.verifyForm, {
+		validators: zod(otpSchema),
+		onSubmit: () => {
+			console.log('Submitting');
+		},
+		onResult: () => {
+			console.log('We got result');
+		}
+	});
+	message.subscribe((message) => {
+		console.log(message);
+	});
 </script>
 
+<SuperDebug data={form} />
 <div class="flex h-screen flex-col items-center justify-center px-4">
 	<Card class="max-w-2xl space-y-6 p-6 md:max-w-[700px]">
 		<div class="mb-8 flex justify-center">
@@ -29,7 +49,7 @@
 		<h5 class="mb-4 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
 			Create an Account
 		</h5>
-		<form class="flex flex-col gap-6" use:enhance method="POST">
+		<form class="flex flex-col gap-6" use:enhance method="POST" action="?/register">
 			<div class="flex flex-col gap-4">
 				<Label for="register-email">Email Address</Label>
 				<Input
@@ -54,6 +74,7 @@
 					bind:value={$form.password}
 				>
 					<button
+						type="button"
 						slot="left"
 						on:click={() => (showPassword = !showPassword)}
 						class="pointer-events-auto"
@@ -80,6 +101,7 @@
 					bind:value={$form.confirmPassword}
 				>
 					<button
+						type="button"
 						slot="left"
 						on:click={() => (showConfirmPassword = !showConfirmPassword)}
 						class="pointer-events-auto"
@@ -105,6 +127,10 @@
 					Already have an account? Log in
 				</button>
 			</div>
+		</form>
+		<form method="POST" action="?/verify" use:verifyFormEnhance>
+			<Input type="number" bind:value={$verifyForm.otp} name="otp" />
+			<Button type="submit">Verify</Button>
 		</form>
 	</Card>
 </div>
