@@ -1,4 +1,5 @@
 // hooks.server.ts
+import { decrypt } from '$lib/utils';
 import { redirect, type Handle } from '@sveltejs/kit';
 import { locale } from 'svelte-i18n';
 
@@ -7,10 +8,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (lang) {
 		locale.set(lang);
 	}
-	console.log('Request reached');
-	const authToken = event.cookies.get('authToken');
-	if (authToken) {
+
+	const authToken = event.cookies.get('authToken') || '';
+	const email = (await decrypt(authToken)).email || '';
+	if (authToken && !email) {
+		event.cookies.set('authToken', '', { expires: new Date(), path: '/' });
+	}
+	if (authToken && email) {
 		event.locals.user = {
+			email: email,
 			token: authToken
 		};
 	}

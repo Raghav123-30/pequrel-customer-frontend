@@ -13,7 +13,8 @@
 		onSubmit: () => {
 			console.log('Submitting');
 		},
-		onResult: () => {
+		onResult: ({ result }) => {
+			console.log(result);
 			console.log('We got result');
 		}
 	});
