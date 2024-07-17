@@ -23,7 +23,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const isPublicPath =
 		event.url.pathname === '/' ||
 		event.url.pathname === '/user/login' ||
-		event.url.pathname === '/user/register';
+		event.url.pathname === '/user/register' ||
+		event.url.pathname === '/reset';
 	if (authToken && isPublicPath) {
 		throw redirect(303, '/configure');
 	}

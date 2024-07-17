@@ -14,8 +14,10 @@
 			console.log('Submitting');
 		},
 		onResult: ({ result }) => {
-			console.log(result);
-			console.log('We got result');
+			if (result.type == 'redirect') {
+				console.log('Taking you to configuration page now');
+				goto('/configure');
+			}
 		}
 	});
 	message.subscribe((value) => {

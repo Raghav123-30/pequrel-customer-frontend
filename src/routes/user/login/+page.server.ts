@@ -21,16 +21,13 @@ export const actions = {
 			return fail(400, { form });
 		}
 		try {
-			const result = await signIn({
+			await signIn({
 				username: form.data.email,
 				password: form.data.password
 			});
-			console.log(result);
-			if (result.isSignedIn) {
-				const authToken = await encrypt({ email: form.data.email });
-				cookies.set('authToken', authToken, { httpOnly: true, path: '/' });
-				throw redirect(303, '/configure');
-			}
+
+			const authToken = await encrypt({ email: form.data.email });
+			cookies.set('authToken', authToken, { httpOnly: true, path: '/' });
 		} catch (error) {
 			if (error instanceof AuthError) {
 				if (error.name === 'NotAuthorizedException')
@@ -39,5 +36,6 @@ export const actions = {
 				return message(form, 'Something went wrong', { status: 400 });
 			}
 		}
+		throw redirect(303, '/configure');
 	}
 };
