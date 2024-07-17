@@ -36,6 +36,6 @@ export const actions = {
 				return message(form, 'Something went wrong', { status: 400 });
 			}
 		}
-		throw redirect(303, '/configure');
+		return message(form, 'Success');
 	}
 };

@@ -48,7 +48,7 @@
 				: 'Enter OTP sent to your email and create new password'}
 		</h5>
 		<form
-			class={`flex flex-col gap-6 ${!isOtpSent && 'hidden'}`}
+			class={`flex flex-col gap-6 ${isOtpSent && 'hidden'}`}
 			method="POST"
 			action="?/verifyEmail"
 			use:verifyEmailFormEnhane
@@ -72,12 +72,12 @@
 			</div>
 		</form>
 		<form
-			class={`flex flex-col gap-6 ${isOtpSent && 'hidden'}`}
+			class={`flex flex-col gap-6 ${!isOtpSent && 'hidden'}`}
 			method="POST"
 			action="?/resetAccount"
 			use:resetAccountFormEnahnce
 		>
-			<div class=" ">
+			<div class=" hidden">
 				<Label for="email">Email</Label>
 
 				<Input type="email" name="email" bind:value={$resetAccountForm.email} />
@@ -96,7 +96,12 @@
 			<div class="flex flex-col gap-4">
 				<Label for="password">Password</Label>
 
-				<Input type="password" name="password" bind:value={$resetAccountForm.password} />
+				<Input
+					class={`${!isOtpSent && 'hidden'}`}
+					type="password"
+					name="password"
+					bind:value={$resetAccountForm.password}
+				/>
 				{#if $resetAccountFormErrors.password}
 					<Helper color="red">{$resetAccountFormErrors.password}</Helper>
 				{/if}
@@ -113,8 +118,8 @@
 					<Helper color="red">{$resetAccountFormErrors.confirmPassword}</Helper>
 				{/if}
 			</div>
-			<div class="flex justify-between gap-2">
-				<Button class="w-fit" type="submit">Reset</Button>
+			<div>
+				<Button type="submit">Reset account</Button>
 			</div>
 		</form>
 	</Card>

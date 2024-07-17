@@ -1,27 +1,22 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { loginSchema } from '$lib/schema/loginSchema.js';
-	import { Button, Card, Label, Select, Input, Helper } from 'flowbite-svelte';
+	import { Button, Card, Label, Select, Input, Helper, Spinner } from 'flowbite-svelte';
 	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
 	let showPassword = false;
 	import { locale } from 'svelte-i18n';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	export let data;
+
+	let loginMessage = '';
+	let showToast = false;
 	const { form, errors, enhance, submitting, message } = superForm(data.form, {
-		validators: zod(loginSchema),
-		onSubmit: () => {
-			console.log('Submitting');
-		},
-		onResult: ({ result }) => {
-			if (result.type == 'redirect') {
-				console.log('Taking you to configuration page now');
-				goto('/configure');
-			}
-		}
+		validators: zod(loginSchema)
 	});
 	message.subscribe((value) => {
 		console.log('Message from server is ' + value);
+		loginMessage = value;
 	});
 </script>
 
@@ -70,15 +65,25 @@
 						{/if}
 					</button>
 				</Input>
-				<button type="button" class="w-fit text-sm text-gray-500 hover:underline"
-					>Forgot password?</button
+				<button
+					on:click={() => {
+						goto('/reset');
+					}}
+					type="button"
+					class="w-fit text-sm text-gray-500 hover:underline">Forgot password?</button
 				>
 				{#if $errors.password}
 					<Helper color="red">{$errors.password}</Helper>
 				{/if}
 			</div>
 			<div class="flex justify-between gap-2">
-				<Button class="w-fit" type="submit">Login</Button>
+				<Button class="w-fit" type="submit" disabled={$submitting}>
+					{#if $submitting}
+						<Spinner class="me-3" size="4" color="white" /> Loggin in
+					{:else}
+						Login
+					{/if}
+				</Button>
 				<button
 					type="button"
 					class="text-sm text-gray-500 hover:underline"
@@ -86,6 +91,13 @@
 				>
 					New here? Create an account
 				</button>
+			</div>
+			<div class="space-y-3">
+				{#if loginMessage}
+					<Helper color="red">
+						{loginMessage}
+					</Helper>
+				{/if}
 			</div>
 		</form>
 	</Card>
