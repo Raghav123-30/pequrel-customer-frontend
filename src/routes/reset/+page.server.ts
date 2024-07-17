@@ -1,6 +1,6 @@
 import { resetAccountSchema } from '$lib/schema/resetAccountSchema';
 import { verifyEmailSchema } from '$lib/schema/verifyEmailSchema';
-import { confirmResetPassword } from 'aws-amplify/auth';
+import { AuthError, confirmResetPassword } from 'aws-amplify/auth';
 import { resetPassword } from 'aws-amplify/auth';
 import { fail, message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -22,6 +22,9 @@ export const actions = {
 			console.log(result);
 			return message(verifyEmailForm, 'success');
 		} catch (error) {
+			return message(verifyEmailForm, 'Something went wrong,please try again later', {
+				status: 404
+			});
 			console.log(error);
 		}
 		return fail(400, { message: 'failed to send OTP' });
@@ -37,8 +40,18 @@ export const actions = {
 			console.log(result);
 			return message(resetAccountForm, 'success');
 		} catch (error) {
-			console.log(error);
+			if (error instanceof AuthError) {
+				if (error.name === 'CodeMismatchException') {
+					return message(resetAccountForm, 'OTP you entered is incorrect', { status: 403 });
+				} else {
+					return message(resetAccountForm, 'Something went wrong,please try again later', {
+						status: 404
+					});
+				}
+			}
 		}
-		return fail(400, { message: 'failed to reset your account' });
+		return message(resetAccountForm, 'Something went wrong,please try again later', {
+			status: 404
+		});
 	}
 };

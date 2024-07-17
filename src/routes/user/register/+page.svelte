@@ -12,6 +12,12 @@
 	let showPassword = false;
 	let showConfirmPassword = false;
 	let showOtpModal = false;
+	let verificationError = false;
+	let verificationErrorMessage = '';
+	let registerError = false;
+	let registerErrorMessage = '';
+	let showToast = false;
+	let successMessage = '';
 	export let data;
 	const { form, errors, enhance, submitting, message } = superForm(data.form, {
 		validators: zod(registerSchema),
@@ -38,13 +44,25 @@
 		validators: zod(otpSchema),
 		resetForm: false,
 		onSubmit: () => {
+			verificationError = false;
+			verificationErrorMessage = '';
 			console.log('Submitting');
 		},
-		onResult: () => {
-			console.log('We got result');
+		onResult: ({ result }) => {
+			if (result.type === 'success') {
+				showToast = true;
+				successMessage = 'You have successfully reset your password.Login to continue';
+				setTimeout(() => {
+					goto('/user/login');
+					showToast = false;
+					successMessage = '';
+				}, 1500);
+			}
 		}
 	});
 	message.subscribe((message) => {
+		verificationError = true;
+		verificationErrorMessage = message;
 		console.log(message);
 	});
 	form.subscribe((values) => {
@@ -140,6 +158,13 @@
 					Already have an account? Log in
 				</button>
 			</div>
+			<div class="gap-2">
+				{#if registerError}
+					<Helper color="red">
+						{registerErrorMessage}
+					</Helper>
+				{/if}
+			</div>
 		</form>
 	</Card>
 </div>
@@ -160,6 +185,11 @@
 		{#if $verifyFormMessage}
 			<Helper color="red">
 				{$verifyFormMessage}
+			</Helper>
+		{/if}
+		{#if verificationError}
+			<Helper color="red">
+				{verificationErrorMessage}
 			</Helper>
 		{/if}
 	</form>
