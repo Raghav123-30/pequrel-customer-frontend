@@ -14,6 +14,7 @@ export const load = async () => {
 export const actions = {
 	verifyEmail: async ({ request }) => {
 		const verifyEmailForm = await superValidate(request, zod(verifyEmailSchema));
+		console.log(`verifyEmailForm data:-`, verifyEmailForm.data);
 		try {
 			const result = await resetPassword({
 				username: verifyEmailForm.data.email

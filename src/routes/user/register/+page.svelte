@@ -1,22 +1,30 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Button, Card, Label, Select, Input, Helper } from 'flowbite-svelte';
+	import { Button, Card, Label, Select, Input, Helper, Modal } from 'flowbite-svelte';
 	import { locale } from 'svelte-i18n';
 	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
 	import SuperDebug, { superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { registerSchema } from '$lib/schema/registerSchema.js';
 	import { otpSchema } from '$lib/schema/otpSchema.js';
+	import { Result } from 'postcss';
 
 	let showPassword = false;
 	let showConfirmPassword = false;
+	let showOtpModal = false;
 	export let data;
 	const { form, errors, enhance, submitting, message } = superForm(data.form, {
 		validators: zod(registerSchema),
+		resetForm: false,
 		onSubmit: () => {
+			$verifyForm.email = $form.email;
+			$verifyForm.password = $form.password;
 			console.log('Submitting');
 		},
-		onResult: () => {
+		onResult: ({ result }) => {
+			if (result.type == 'success') {
+				showOtpModal = true;
+			}
 			console.log('We got result');
 		}
 	});
@@ -28,6 +36,7 @@
 		message: verifyFormMessage
 	} = superForm(data.verifyForm, {
 		validators: zod(otpSchema),
+		resetForm: false,
 		onSubmit: () => {
 			console.log('Submitting');
 		},
@@ -38,9 +47,13 @@
 	message.subscribe((message) => {
 		console.log(message);
 	});
+	form.subscribe((values) => {
+		$verifyForm.email = values.email;
+		$verifyForm.password = values.password;
+	});
 </script>
 
-<SuperDebug data={form} />
+<SuperDebug data={verifyForm} />
 <div class="flex h-screen flex-col items-center justify-center px-4">
 	<Card class="max-w-2xl space-y-6 p-6 md:max-w-[700px]">
 		<div class="mb-8 flex justify-center">
@@ -128,9 +141,26 @@
 				</button>
 			</div>
 		</form>
-		<form method="POST" action="?/verify" use:verifyFormEnhance>
-			<Input type="number" bind:value={$verifyForm.otp} name="otp" />
-			<Button type="submit">Verify</Button>
-		</form>
 	</Card>
 </div>
+
+<Modal bind:open={showOtpModal} size="xs" title="Enter OTP sent to your email" autoclose={false}>
+	<form method="POST" action="?/verify" use:verifyFormEnhance class="flex flex-col gap-6">
+		<Input type="email" bind:value={$verifyForm.email} name="email" />
+		<Input type="password" bind:value={$verifyForm.password} name="password" />
+		<div class="flex flex-col gap-4">
+			<Label>OTP</Label>
+			<Input type="number" bind:value={$verifyForm.otp} name="otp" />
+			{#if $verifyFormErrors.otp}
+				<Helper color="red">{$verifyFormErrors.otp}</Helper>
+			{/if}
+		</div>
+
+		<Button type="submit">Verify</Button>
+		{#if $verifyFormMessage}
+			<Helper color="red">
+				{$verifyFormMessage}
+			</Helper>
+		{/if}
+	</form>
+</Modal>
