@@ -1,6 +1,3 @@
-import { Amplify } from 'aws-amplify';
-import awsmobile from '../../aws-exports.js';
-import { signOut } from 'aws-amplify/auth';
 import { getData } from '$lib/server/utils/dataServices.js';
 
 import type { CustomerDetails } from '$lib/models/customerDetails.js';
@@ -19,14 +16,5 @@ export const load = async ({ locals }) => {
 			error: false,
 			customerDetails: customerDetailsResult.data!
 		};
-	}
-};
-
-export const actions = {
-	logout: async ({ cookies }) => {
-		Amplify.configure(awsmobile);
-		await signOut();
-		console.log('Logging out now...');
-		cookies.set('authToken', '', { expires: new Date(), path: '/' });
 	}
 };

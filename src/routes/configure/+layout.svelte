@@ -1,5 +1,9 @@
 <script lang="ts">
 	import { Navbar, NavBrand, NavLi, NavUl, NavHamburger } from 'flowbite-svelte';
+	const logoutUser = async () => {
+		await fetch('/api/logout', { method: 'POST' });
+		window.location.reload();
+	};
 </script>
 
 <Navbar>
@@ -11,7 +15,7 @@
 		<NavLi href="/configure">Home</NavLi>
 		<!--		TODO add langauge selection button-->
 
-		<!--		TODO add logout button-->
+		<NavLi href="#" on:click={logoutUser}>Logout</NavLi>
 	</NavUl>
 </Navbar>
 <slot />
