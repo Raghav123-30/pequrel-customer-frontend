@@ -6,4 +6,5 @@ export type Crop = {
 	cropNameHindi: string;
 	default: boolean;
 	imgUrl: string;
+	mode: string;
 };
