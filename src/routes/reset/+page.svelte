@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { Button, Input, Helper, Card, Label, Spinner } from 'flowbite-svelte';
-	import SuperDebug, { message, superForm } from 'sveltekit-superforms';
+	import { message, superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { verifyEmailSchema } from '$lib/schema/verifyEmailSchema.js';
 	import { resetAccountSchema } from '$lib/schema/resetAccountSchema.js';
 	import { Toast } from 'flowbite-svelte';
-	import { ExclamationCircleSolid, CheckCircleSolid } from 'flowbite-svelte-icons';
+	import { CheckCircleSolid } from 'flowbite-svelte-icons';
 	import { goto } from '$app/navigation';
 	export let data;
+	let showPassword = false;
+	let showConfirmPassword = false;
+	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
 	const {
 		form: resetAccountForm,
 		errors: resetAccountFormErrors,
@@ -17,6 +20,10 @@
 	} = superForm(data.resetAccountForm, {
 		validators: zod(resetAccountSchema),
 		resetForm: false,
+		onSubmit: () => {
+			resetError = false;
+			resetErrorMessage = '';
+		},
 
 		onResult: ({ result }) => {
 			if (result.type === 'success') {
@@ -59,13 +66,13 @@
 	let showToast = false;
 	let successMessage = '';
 	verifyEmailFormMessage.subscribe((value) => {
-		if (value) {
+		if (value && value != 'SUCCESS') {
 			verificationError = true;
 			verificationErrorMessage = value;
 		}
 	});
 	resetAccountFormMessage.subscribe((value) => {
-		if (value) {
+		if (value && value != 'SUCCESS') {
 			resetError = true;
 			resetErrorMessage = value;
 		}
@@ -110,7 +117,7 @@
 				{/if}
 			</div>
 
-			<div class="flex justify-between gap-2">
+			<div class="flex items-center justify-between gap-2">
 				<Button class="w-fit" type="submit">
 					{#if $verifyEmailFormsSubmitting}
 						<Spinner class="me-3" size="4" color="white" /> sending otp
@@ -118,6 +125,13 @@
 						Request otp
 					{/if}
 				</Button>
+				<button
+					type="button"
+					class="text-sm text-gray-500 hover:underline"
+					on:click={() => goto('/')}
+				>
+					Go back to home page
+				</button>
 			</div>
 			<div class="gap-2">
 				{#if verificationError}
@@ -148,30 +162,60 @@
 				{/if}
 			</div>
 			<div class="flex flex-col gap-4">
-				<Label for="password">Password</Label>
-
+				<Label for="register-password">Password</Label>
 				<Input
-					class={`${!isOtpSent && 'hidden'}`}
-					type="password"
 					name="password"
+					id="show-password"
+					type={showPassword ? 'text' : 'password'}
+					placeholder="*****************"
+					size="lg"
 					bind:value={$resetAccountForm.password}
-				/>
+				>
+					<button
+						type="button"
+						slot="left"
+						on:click={() => (showPassword = !showPassword)}
+						class="pointer-events-auto"
+					>
+						{#if showPassword}
+							<EyeOutline class="h-6 w-6" />
+						{:else}
+							<EyeSlashOutline class="h-6 w-6" />
+						{/if}
+					</button>
+				</Input>
 				{#if $resetAccountFormErrors.password}
 					<Helper color="red">{$resetAccountFormErrors.password}</Helper>
 				{/if}
 			</div>
 			<div class="flex flex-col gap-4">
 				<Label for="confirmPassword">Retype Password</Label>
-
 				<Input
-					type="password"
 					name="confirmPassword"
+					id="show-password"
+					type={showConfirmPassword ? 'text' : 'password'}
+					placeholder="*****************"
+					size="lg"
 					bind:value={$resetAccountForm.confirmPassword}
-				/>
+				>
+					<button
+						type="button"
+						slot="left"
+						on:click={() => (showConfirmPassword = !showConfirmPassword)}
+						class="pointer-events-auto"
+					>
+						{#if showConfirmPassword}
+							<EyeOutline class="h-6 w-6" />
+						{:else}
+							<EyeSlashOutline class="h-6 w-6" />
+						{/if}
+					</button>
+				</Input>
 				{#if $resetAccountFormErrors.confirmPassword}
 					<Helper color="red">{$resetAccountFormErrors.confirmPassword}</Helper>
 				{/if}
 			</div>
+
 			<div>
 				<Button type="submit">
 					{#if $resetAccountFormSubmitting}

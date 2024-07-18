@@ -1,8 +1,10 @@
+import type { Customer } from '$lib/models/customer';
 import { resetAccountSchema } from '$lib/schema/resetAccountSchema';
 import { verifyEmailSchema } from '$lib/schema/verifyEmailSchema';
+import { getData } from '$lib/server/utils/dataServices.js';
 import { AuthError, confirmResetPassword } from 'aws-amplify/auth';
 import { resetPassword } from 'aws-amplify/auth';
-import { fail, message, superValidate } from 'sveltekit-superforms';
+import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = async () => {
@@ -14,20 +16,31 @@ export const load = async () => {
 export const actions = {
 	verifyEmail: async ({ request }) => {
 		const verifyEmailForm = await superValidate(request, zod(verifyEmailSchema));
-		console.log(`verifyEmailForm data:-`, verifyEmailForm.data);
-		try {
-			const result = await resetPassword({
-				username: verifyEmailForm.data.email
-			});
-			console.log(result);
-			return message(verifyEmailForm, 'success');
-		} catch (error) {
-			return message(verifyEmailForm, 'Something went wrong,please try again later', {
+		const existingCustomerResult = await getData<Customer>(
+			`/api/customers/email?email=${verifyEmailForm.data.email}`
+		);
+
+		if (existingCustomerResult.error) {
+			return message(verifyEmailForm, 'This email is not registered at pequrel', {
 				status: 404
 			});
-			console.log(error);
+		} else if (!existingCustomerResult.data?.hasRegistered) {
+			return message(verifyEmailForm, "You don't have an account yet.Please register", {
+				status: 404
+			});
+		} else {
+			try {
+				const result = await resetPassword({
+					username: verifyEmailForm.data.email
+				});
+				console.log(result);
+				return message(verifyEmailForm, 'SUCCESS');
+			} catch {
+				return message(verifyEmailForm, 'Something went wrong,please try again later', {
+					status: 404
+				});
+			}
 		}
-		return fail(400, { message: 'failed to send OTP' });
 	},
 	resetAccount: async ({ request }) => {
 		const resetAccountForm = await superValidate(request, zod(resetAccountSchema));
@@ -38,7 +51,7 @@ export const actions = {
 				confirmationCode: resetAccountForm.data.otp
 			});
 			console.log(result);
-			return message(resetAccountForm, 'success');
+			return message(resetAccountForm, 'SUCCESS');
 		} catch (error) {
 			if (error instanceof AuthError) {
 				if (error.name === 'CodeMismatchException') {
