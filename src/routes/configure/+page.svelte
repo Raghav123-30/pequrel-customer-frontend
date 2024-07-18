@@ -14,6 +14,15 @@
 	import SuperDebug from 'sveltekit-superforms';
 	let showCropImagesCarousel = false;
 	import { Carousel, Thumbnails } from 'flowbite-svelte';
+	import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
+	type CropImage = {
+		name: string;
+		title: string;
+		alt: string;
+		src: string;
+		value: string;
+	};
+	let image: CropImage;
 
 	const { customerCrops, customerProducts, cropCategories, customerData } = customerDetails;
 
@@ -76,7 +85,7 @@
 				src: item.imgUrl,
 				title: item.cropNameEnglish
 			};
-		});
+		}) as CropImage[];
 	const { form, enhance, errors, submitting } = superForm(selfConfigurationForm, {
 		validators: zod(selfConfigurationSchema),
 		onSubmit: () => {
@@ -151,7 +160,7 @@
 							bind:value={$form.cropCategoryId}
 							disabled={!$form.productId || !$form.mode}
 							on:change={() => {
-								showCropImagesCarousel = false;
+								showCropImagesCarousel = true;
 
 								$form.cropId = '';
 							}}
@@ -163,15 +172,16 @@
 							</Helper>
 						{/if}
 					</div>
+					{#if $form.cropId}
+						<div class="flex flex-col items-center justify-center gap-3">
+							<h2>You have selected {image.name}</h2>
+							<img src={image.src} alt={image.alt} class="h-24 w-24" />
+						</div>
+					{/if}
 
 					<input class="hidden" name="cropId" bind:value={$form.cropId} />
 					{#if $form.cropCategoryId}
-						<div>
-							<Carousel images={cropSelectionList} {forward} let:Indicators let:Controls bind:index>
-								<Indicators />
-								<Thumbnails images={cropSelectionList} {forward} bind:index />
-							</Carousel>
-						</div>
+						<Button type="submit">Next</Button>
 					{/if}
 				</form>
 			</div>
@@ -200,5 +210,40 @@
 				>Continue</Button
 			>
 		</div>
+	</div>
+</Modal>
+
+<Modal open={showCropImagesCarousel} autoclose={false}>
+	<div>
+		{#if cropSelectionList.length}
+			<Carousel
+				on:change={({ detail }) => {
+					image = detail;
+				}}
+				images={cropSelectionList}
+				{forward}
+				let:Controls
+				bind:index
+			>
+				<Controls class="items-center pt-4 text-slate-900 dark:text-slate-900" />
+			</Carousel>
+			<Button
+				class="my-4 w-full"
+				on:click={() => {
+					$form.cropId = image.value;
+					showCropImagesCarousel = false;
+				}}
+			>
+				Select {image?.alt}
+			</Button>
+		{:else}
+			<div class="border-md flex flex-col gap-2 bg-red-200 p-3">
+				<ExclamationCircleOutline color="red" />
+				<p>
+					You have not received training for any crops for the product, mode, or category you have
+					chosen. Try choosing different settings to load crops.
+				</p>
+			</div>
+		{/if}
 	</div>
 </Modal>
