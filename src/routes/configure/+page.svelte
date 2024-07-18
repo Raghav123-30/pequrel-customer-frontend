@@ -3,10 +3,13 @@
 	console.log('Protected route reached');
 	export let data;
 	import { Button } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
+	onMount(() => {
+		console.log(data.customerDetails);
+	});
 </script>
 
 <div>
-	<p>Configuration self service page for customer with email {data.email}</p>
 	<form method="POST" action="?/logout" use:enhance>
 		<Button type="submit">Logout</Button>
 	</form>
