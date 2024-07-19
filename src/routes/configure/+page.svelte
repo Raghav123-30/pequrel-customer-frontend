@@ -11,10 +11,10 @@
 	let showInstructionsModal = true;
 	import { superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import SuperDebug from 'sveltekit-superforms';
+
 	let showCropImagesCarousel = false;
 	import { Carousel, Thumbnails } from 'flowbite-svelte';
-	import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
+	import { ExclamationCircleOutline, CheckCircleSolid } from 'flowbite-svelte-icons';
 	type CropImage = {
 		name: string;
 		title: string;
@@ -22,8 +22,8 @@
 		src: string;
 		value: string;
 	};
-	let image: CropImage;
-
+	let image: CropImage = {} as CropImage;
+	console.log(`image ${image}`);
 	const { customerCrops, customerProducts, cropCategories, customerData } = customerDetails;
 
 	onMount(() => {
@@ -66,6 +66,7 @@
 			value: item.cropCategoryId
 		};
 	});
+	let wasDeploymentSuccess = false;
 	$: cropSelectionList = customerCrops
 		.filter(
 			(item) =>
@@ -88,10 +89,13 @@
 		}) as CropImage[];
 	const { form, enhance, errors, submitting } = superForm(selfConfigurationForm, {
 		validators: zod(selfConfigurationSchema),
+		resetForm: true,
+
 		onSubmit: () => {
 			console.log('Submitting');
 		},
 		onResult: ({ result }) => {
+			wasDeploymentSuccess = true;
 			console.log(result);
 		}
 	});
@@ -101,19 +105,32 @@
 	<DisplayError
 		message="Server is facing some issues.Please try again later.If the issue persists, please contact Pequrel team for support"
 	/>
+{:else if wasDeploymentSuccess}
+	<div class="center">
+		<Card color="green" class="mx-auto max-w-4xl px-8">
+			<div class="flex flex-col items-center justify-between gap-4">
+				<CheckCircleSolid color="green" size="xl" />
+				<div class="flex flex-col items-center justify-between gap-4">
+					<p>You have successfully deployed your crop in your setup.</p>
+					<Button color="alternative" on:click={() => window.location.reload()}
+						>Go back to homepage</Button
+					>
+				</div>
+			</div>
+		</Card>
+	</div>
 {:else if customerProducts.length === 0 || customerCrops.length === 0}
 	<DisplayError
 		message="It looks like you haven't received training to deploy any crops on your setup yet.If you believe its a mistake contact Pequrel team and ask them to add crops in your record"
 	/>
 {:else}
-	<SuperDebug data={form} />
 	<div class="px-4 py-10">
 		<Card class="mx-auto max-w-4xl px-8">
 			<h5 class="mb-4 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
 				Configure your setup
 			</h5>
 			<div>
-				<form class="flex w-full flex-col gap-6" method="POST">
+				<form class="flex w-full flex-col gap-6" method="POST" use:enhance>
 					<div class="flex flex-col gap-2">
 						<Label>Products</Label>
 						<Select
@@ -144,6 +161,8 @@
 							disabled={!$form.productId}
 							on:change={() => {
 								$form.cropId = '';
+								$form.cropCategoryId = '';
+								showCropImagesCarousel = false;
 							}}
 						/>
 						{#if $errors.mode}
@@ -174,14 +193,16 @@
 					</div>
 					{#if $form.cropId}
 						<div class="flex flex-col items-center justify-center gap-3">
-							<h2>You have selected {image.name}</h2>
+							<h2>You have selected {image.name ? image.name : ''}</h2>
 							<img src={image.src} alt={image.alt} class="h-24 w-24" />
 						</div>
 					{/if}
 
 					<input class="hidden" name="cropId" bind:value={$form.cropId} />
-					{#if $form.cropCategoryId}
-						<Button type="submit">Next</Button>
+					{#if $form.cropCategoryId && $form.cropId}
+						<div class="flex justify-end">
+							<Button type="submit">Deploy</Button>
+						</div>
 					{/if}
 				</form>
 			</div>
@@ -213,7 +234,15 @@
 	</div>
 </Modal>
 
-<Modal open={showCropImagesCarousel} autoclose={false}>
+<Modal
+	open={showCropImagesCarousel}
+	autoclose={false}
+	dismissable={true}
+	on:close={() => {
+		console.log('closing');
+		showCropImagesCarousel = false;
+	}}
+>
 	<div>
 		{#if cropSelectionList.length}
 			<Carousel
@@ -237,13 +266,13 @@
 				Select {image?.alt}
 			</Button>
 		{:else}
-			<div class="border-md flex flex-col gap-2 bg-red-200 p-3">
+			<Card class="w-full self-center" color="red">
 				<ExclamationCircleOutline color="red" />
 				<p>
 					You have not received training for any crops for the product, mode, or category you have
 					chosen. Try choosing different settings to load crops.
 				</p>
-			</div>
+			</Card>
 		{/if}
 	</div>
 </Modal>

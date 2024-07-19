@@ -29,6 +29,7 @@ export async function getData<T>(url: string): Promise<ApiData<T>> {
 
 export async function postData<T>(url: string, body: T): Promise<ApiData<T>> {
 	try {
+		console.log(BASE_URL + url);
 		const response = await fetch(BASE_URL + url, {
 			method: 'POST',
 			headers: {
