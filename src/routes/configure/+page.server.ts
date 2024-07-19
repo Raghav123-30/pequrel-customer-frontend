@@ -45,7 +45,7 @@ export const actions = {
 			if (deploymentResponse.error) {
 				return message(form, 'Failed to deploy your crop.Please try again later', { status: 403 });
 			} else {
-				return message(form, 'Crop has been successfully deployed');
+				return message(form, 'SUCCESS');
 			}
 		}
 	}

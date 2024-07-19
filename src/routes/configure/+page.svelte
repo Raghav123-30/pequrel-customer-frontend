@@ -2,7 +2,7 @@
 	console.log('Protected route reached');
 	export let data;
 	const { error, customerDetails, selfConfigurationForm } = data;
-	import { Button, Card, Select, Label, Helper } from 'flowbite-svelte';
+	import { Button, Card, Select, Label, Helper, Spinner } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import { Modal, Checkbox } from 'flowbite-svelte';
 	import DisplayError from '$lib/components/utils/DisplayError.svelte';
@@ -15,6 +15,7 @@
 	let showCropImagesCarousel = false;
 	import { Carousel, Thumbnails } from 'flowbite-svelte';
 	import { ExclamationCircleOutline, CheckCircleSolid } from 'flowbite-svelte-icons';
+
 	type CropImage = {
 		name: string;
 		title: string;
@@ -87,16 +88,28 @@
 				title: item.cropNameEnglish
 			};
 		}) as CropImage[];
-	const { form, enhance, errors, submitting } = superForm(selfConfigurationForm, {
+	let showConfigurationError = false;
+	let configurationErrorMessage = '';
+	const { form, enhance, errors, submitting, message } = superForm(selfConfigurationForm, {
 		validators: zod(selfConfigurationSchema),
 		resetForm: true,
 
 		onSubmit: () => {
+			showConfigurationError = false;
+			configurationErrorMessage = '';
 			console.log('Submitting');
 		},
 		onResult: ({ result }) => {
-			wasDeploymentSuccess = true;
-			console.log(result);
+			if (result.type == 'success') {
+				wasDeploymentSuccess = true;
+				console.log(result);
+			}
+		}
+	});
+	message.subscribe((value) => {
+		if (value && value != 'SUCCESS') {
+			showConfigurationError = true;
+			configurationErrorMessage = value;
 		}
 	});
 </script>
@@ -201,8 +214,19 @@
 					<input class="hidden" name="cropId" bind:value={$form.cropId} />
 					{#if $form.cropCategoryId && $form.cropId}
 						<div class="flex justify-end">
-							<Button type="submit">Deploy</Button>
+							<Button type="submit" disabled={$submitting}>
+								{#if $submitting}
+									<Spinner class="me-3" size="4" color="white" /> Deploying....
+								{:else}
+									Deploy
+								{/if}
+							</Button>
 						</div>
+					{/if}
+					{#if showConfigurationError}
+						<Helper color="red" class="space-y-2">
+							{configurationErrorMessage}
+						</Helper>
 					{/if}
 				</form>
 			</div>
