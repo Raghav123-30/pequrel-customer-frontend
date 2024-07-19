@@ -261,7 +261,7 @@
 <Modal
 	open={showCropImagesCarousel}
 	autoclose={false}
-	dismissable={true}
+	dismissable={false}
 	on:close={() => {
 		console.log('closing');
 		showCropImagesCarousel = false;
@@ -270,16 +270,20 @@
 	<div>
 		{#if cropSelectionList.length}
 			<Carousel
+				size="md"
 				on:change={({ detail }) => {
 					image = detail;
 				}}
 				images={cropSelectionList}
 				{forward}
 				let:Controls
+				let:Indicators
 				bind:index
 			>
 				<Controls class="items-center pt-4 text-slate-900 dark:text-slate-900" />
+				<Indicators />
 			</Carousel>
+
 			<Button
 				class="my-4 w-full"
 				on:click={() => {
@@ -290,13 +294,24 @@
 				Select {image?.alt}
 			</Button>
 		{:else}
-			<Card class="w-full self-center" color="red">
-				<ExclamationCircleOutline color="red" />
+			<div>
+				<ExclamationCircleOutline color="red" size="md" />
 				<p>
 					You have not received training for any crops for the product, mode, or category you have
 					chosen. Try choosing different settings to load crops.
 				</p>
-			</Card>
+				<Button
+					class="w-fit"
+					color="alternative"
+					on:click={() => {
+						$form.productId = '';
+						$form.cropCategoryId = '';
+						$form.cropId = '';
+						$form.mode = '';
+						showCropImagesCarousel = false;
+					}}>Reset</Button
+				>
+			</div>
 		{/if}
 	</div>
 </Modal>
