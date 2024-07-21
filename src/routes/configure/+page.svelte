@@ -35,8 +35,8 @@
 
 	const instructions = [
 		'First, select the product from the selection list',
-		'Next, select the mode from the radio group',
-		'Next, select the crop category from the dropdown menu.',
+		'Next, select the mode from the selection list',
+		'Next, select the crop category from the selection list.',
 		'Next, choose the crop you want to deploy from the list of images that are displayed.Please note only those crops will be visible for which you have received training from Pequrel Engineers.',
 		'Click the Submit button to confirm your selections. Ensure that the selected crop matches the crop deployed in the A3S setup.',
 		'If there are any special instructions available, read them carefully and then click the Approve button.',
@@ -99,7 +99,7 @@
 	let configurationErrorMessage = '';
 	const { form, enhance, errors, submitting, message } = superForm(selfConfigurationForm, {
 		validators: zod(selfConfigurationSchema),
-		resetForm: true,
+		resetForm: false,
 
 		onSubmit: () => {
 			showConfigurationError = false;
@@ -131,7 +131,13 @@
 			<div class="flex flex-col items-center justify-between gap-4">
 				<CheckCircleSolid color="green" size="xl" />
 				<div class="flex flex-col items-center justify-between gap-4">
-					<p>You have successfully deployed your crop in your setup.</p>
+					<p>
+						You have successfully deployed the crop '{image.name ? image.name : ''}' in your product
+						'{customerProducts.find((item) => item.productId === $form.productId)?.productName}' in
+						'{customerData.customerProducts.find((item) => item.productId === $form.productId)
+							?.setupCity}'. It will take just a few minutes for configuration in your setup to be
+						adjusted for the chosen crop.
+					</p>
 					<Button color="alternative" on:click={() => window.location.reload()}
 						>Go back to homepage</Button
 					>
@@ -218,6 +224,18 @@
 						</div>
 					{/if}
 
+					{#if $form.cropCategoryId && $form.cropId}
+						<div class="space-y-2 text-center">
+							<Helper color="green" class="space-y-2" helperClass="text-md">
+								Upon clicking deploy, the crop '{image.name ? image.name : ''}' will be deployed in
+								your product '{customerProducts.find((item) => item.productId === $form.productId)
+									?.productName}' in '{customerData.customerProducts.find(
+									(item) => item.productId === $form.productId
+								)?.setupCity}'.
+							</Helper>
+						</div>
+					{/if}
+
 					<input class="hidden" name="cropId" bind:value={$form.cropId} />
 					{#if $form.cropCategoryId && $form.cropId}
 						<div class="flex justify-end">
@@ -231,9 +249,11 @@
 						</div>
 					{/if}
 					{#if showConfigurationError}
-						<Helper color="red" class="space-y-2">
-							{configurationErrorMessage}
-						</Helper>
+						<div>
+							<Helper color="red" class="space-y-2">
+								{configurationErrorMessage}
+							</Helper>
+						</div>
 					{/if}
 				</form>
 			</div>
