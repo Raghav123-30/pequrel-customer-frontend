@@ -68,7 +68,14 @@
 		};
 	});
 	let wasDeploymentSuccess = false;
-	$: cropSelectionList = customerCrops
+
+	$: trainingCrops = customerCrops.filter((item) =>
+		customerData.setupCrops
+			?.filter((cat) => cat.productId == $form.productId)
+			.map((cat) => cat.cropId)
+			.includes(item.cropId!)
+	);
+	$: cropSelectionList = trainingCrops
 		.filter(
 			(item) =>
 				item.cropCategoryId == $form.cropCategoryId &&
