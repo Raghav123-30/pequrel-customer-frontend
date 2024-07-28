@@ -127,7 +127,7 @@
 	/>
 {:else if wasDeploymentSuccess}
 	<div class="center">
-		<Card color="green" class="mx-auto max-w-4xl px-8">
+		<Card color="green" class="mx-auto  max-w-7xl px-2 md:max-w-4xl  md:px-8">
 			<div class="flex flex-col items-center justify-between gap-4">
 				<CheckCircleSolid color="green" size="xl" />
 				<div class="flex flex-col items-center justify-between gap-4">
