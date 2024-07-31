@@ -58,7 +58,7 @@ export const actions = {
 						password: form.data.password
 					});
 					console.log(result);
-					await updateCustomer(customer);
+
 					return message(form, 'SUCCESS');
 				} catch (error) {
 					console.log(error);
