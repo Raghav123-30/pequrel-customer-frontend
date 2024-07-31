@@ -39,6 +39,7 @@ export const actions = {
 			`/api/customers/email?email=${form.data.email}`
 		);
 		console.log(`/api/customers/email?email=${form.data.email}`);
+		console.log(existingCustomerResult);
 		if (!form.valid) {
 			console.log('form is invalid');
 			return fail(400, { form });

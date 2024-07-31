@@ -2,15 +2,17 @@ import {
 	PUBLIC_IDENTITY_POOL_ID,
 	PUBLIC_POOL_ID,
 	PUBLIC_S3_BUCKET,
-	PUBLIC_S3_BUCKET_REGION
+	PUBLIC_S3_BUCKET_REGION,
+	PUBLIC_WEB_CLIENT_ID,
+	PUBLIC_AWS_REGION
 } from '$env/static/public';
 
 const awsmobile = {
-	aws_project_region: 'us-east-1',
+	aws_project_region: PUBLIC_AWS_REGION,
 	aws_cognito_identity_pool_id: PUBLIC_IDENTITY_POOL_ID,
-	aws_cognito_region: 'us-east-1',
+	aws_cognito_region: PUBLIC_AWS_REGION,
 	aws_user_pools_id: PUBLIC_POOL_ID,
-	aws_user_pools_web_client_id: '49gekp3gj30s4spea7ffkb2vg5',
+	aws_user_pools_web_client_id: PUBLIC_WEB_CLIENT_ID,
 	oauth: {},
 	aws_cognito_username_attributes: ['EMAIL'],
 	aws_cognito_social_providers: [],
